@@ -1,0 +1,42 @@
+:root {
+    --command: #334E6DC8;
+    --medical: #52B4E996;
+    --service: #9FED5896;
+    --engineering: #EFB34196;
+    --security: #DE3A3A96;
+    --bar: #79150096;
+    --science: #D381C996;
+    --cargo: #A4610696;
+    --neutral: #D4D4D496;
+    --neutral-light: #D4D4D428;
+
+    --black: #1D1D21;
+    --red: #B02E26;
+    --green: #5E7C16;
+    --brown: #835432;
+    --blue: #3C44AA;
+    --purple: #8932B8;
+    --cyan: #169C9C;
+    --light-gray: #9D9D97;
+    --gray: #474F52;
+    --pink: #F38BAA;
+    --lime: #80C71F;
+    --yellow: #FED83D;
+    --light-blue: #3AB3DA;
+    --magenta: #C74EBD;
+    --orange: #F9801D;
+    --white: #F9FFFE;
+}
+
+canvas {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+.map {
+    height: 100vh;
+    width: 100%;
+    background-color: #060913;
+}
