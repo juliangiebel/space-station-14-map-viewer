@@ -15,6 +15,7 @@ class Parallax extends BaseImageLayer {
 		super(opt_options);
 		this.scale = scale;
 		this.offset = offset;
+		this.layers = opt_options.layers;
 	}
 
 	createRenderer() {
