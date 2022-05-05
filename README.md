@@ -1,7 +1,7 @@
 # Space Station 14 map viewer
 
 ## Requirements
-* Node.js
+* Npm
 * Vite https://vitejs.dev/
 * OpenLayers
 
