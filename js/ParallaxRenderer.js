@@ -14,6 +14,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 	 */
 	constructor(parallaxLayer) {
 		super(parallaxLayer);
+		this.layers = parallaxLayer.layers;
 		this.offset = parallaxLayer.offset;
 		this.scale = parallaxLayer.scale;
 	}
@@ -48,7 +49,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const viewCenter = viewState.center;
 		const viewResolution = viewState.resolution;
 		const size = frameState.size;
-		const scale =
+		const imageScale =
 			(pixelRatio * imageResolution) / (viewResolution * imagePixelRatio);
 
 		let width = Math.round(size[0] * pixelRatio);
@@ -109,6 +110,12 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 
 		const img = image.getImage();
 
+		for (const layer of this.layers) {
+			const layerImage = new Image();
+			layerImage.src = layer.url;
+			layer.img = layerImage;
+		}
+
 		const xOffsetFromCenter = (viewCenter[0] - imageExtent[2] / 2) * this.scale[0] + this.offset[0];
 		const yOffsetFromCenter = (viewCenter[1] - imageExtent[3] / 2) * this.scale[1] + this.offset[1];
 
@@ -116,8 +123,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			this.tempTransform,
 			width / 2,
 			height / 2,
-			scale,
-			scale,
+			imageScale,
+			imageScale,
 			0,
 			(imagePixelRatio * (imageExtent[0] - viewCenter[0])) - xOffsetFromCenter / imageResolution,
 			(imagePixelRatio * (viewCenter[1] - imageExtent[3])) + yOffsetFromCenter / imageResolution
@@ -152,7 +159,20 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			const pattern = context.createPattern(img, 'repeat');
 			pattern.setTransform(matrix);
 			context.fillStyle = pattern;
+			context.globalCompositeOperation = 'source-over';
 			context.fillRect(0, 0, clientWidth, clientHeight);
+
+			for (const layer of this.layers) {
+				const layerPattern = context.createPattern(layer.img, 'repeat');
+				const layer_xOffsetFromCenter = (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] + this.offset[0];
+				const layer_yOffsetFromCenter = (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] + this.offset[1];
+				var layer_matrix = new DOMMatrix();
+				layer_matrix = layer_matrix.translateSelf(-layer_xOffsetFromCenter, layer_yOffsetFromCenter);
+				layerPattern.setTransform(layer_matrix);
+				context.fillStyle = layerPattern;
+				context.globalCompositeOperation = layer.composite || 'source-over';
+				context.fillRect(0, 0, clientWidth, clientHeight);
+			}
 
 			//TODO: Make it an option to switch between pattern fill and drawing a single image!
 			/*context.drawImage(
