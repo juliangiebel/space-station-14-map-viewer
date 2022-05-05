@@ -52,13 +52,14 @@
 			})
 		});
 
-		const spaceLayer = new Parallax([1.5,1.5], [0,0], {
+		const spaceLayer = new Parallax([0.2, 0.2], [0,0], {
 			source: new ImageStatic({
 				//attributions: '© <a href="https://wiki.spacestation14.io/wiki/File:Deltastation.png">Space Station 14 wiki</a>',
-				url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
+				//url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
+				url: 'https://unsplash.com/photos/Q_RBVFFXR_g/download?force=true&w=640',
 				interpolate: false,
 				projection: projection,
-				imageExtent: extent,
+				imageExtent: [0, 0, 6000, 4000],//extent,
 				imageSmoothing: false
 			}),
 		})
