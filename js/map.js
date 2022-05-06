@@ -54,8 +54,6 @@
 
 		const spaceLayer = new Parallax([0.1, 0.1], [0,0], {
 			source: new ImageStatic({
-				//attributions: '© <a href="https://wiki.spacestation14.io/wiki/File:Deltastation.png">Space Station 14 wiki</a>',
-				//url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
 				url: 'https://i.imgur.com/IannmmK.png',
 				interpolate: false,
 				projection: projection,
@@ -81,21 +79,18 @@
 					offset: [0, 0],
 					*/
 				},
-			],
+			]
 		})
-		
-		/*new Image({
-			className: 'test',
-			source: new ImageCanvas({
-				//attributions: '© <a href="https://wiki.spacestation14.io/wiki/File:Deltastation.png">Space Station 14 wiki</a>',
-				canvasFunction: function (extend) {
-					return document.getElementById("space");
-				},
+
+		const testLayer = new Parallax([0.1, 0.1], [800,450], {
+			source: new ImageStatic({
+				url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
 				interpolate: false,
 				projection: projection,
-				imageExtent: extent
+				imageExtent: extent,
 			}),
-		});*/
+			simple: true
+		});
 
 		const mapLayer = new Image({
 			className: 'test',
@@ -112,6 +107,7 @@
 		const map = new Map({
 			layers: [
 				spaceLayer,
+				//testLayer,
 				mapLayer,
 				vectorLayer
 			],
