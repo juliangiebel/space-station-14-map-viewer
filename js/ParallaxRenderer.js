@@ -18,6 +18,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		this.layers = parallaxLayer.layers || [];
 		this.offset = parallaxLayer.offset;
 		this.scale = parallaxLayer.scale;
+		this.parentExtent = parallaxLayer.parentExtent;
 		this.isSimple = parallaxLayer.isSimple;
 		this.changed = () => parallaxLayer.changed();
 	}
@@ -52,8 +53,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const viewCenter = viewState.center;
 		const viewResolution = viewState.resolution;
 		const size = frameState.size;
-		const imageScale =
-			(pixelRatio * imageResolution) / (viewResolution * imagePixelRatio);
+		const imageScale = (pixelRatio * imageResolution) / (viewResolution * imagePixelRatio);
+		console.log(viewResolution);
 
 		let width = Math.round(size[0] * pixelRatio);
 		let height = Math.round(size[1] * pixelRatio);
@@ -111,8 +112,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			}
 		}
 
-		const xOffsetFromCenter = (viewCenter[0] - imageExtent[2] / 2) * this.scale[0] * (this.isSimple ? 1 : (imageScale / 100)) + this.offset[0];
-		const yOffsetFromCenter = (viewCenter[1] - imageExtent[3] / 2) * this.scale[1] * (this.isSimple ? 1 : (imageScale / 100)) + this.offset[1];
+		const xOffsetFromCenter = (viewCenter[0] - this.parentExtent[2] / 2) * this.scale[0] * (this.isSimple ? 1 : (imageScale / 100)) + this.offset[0];
+		const yOffsetFromCenter = (viewCenter[1] - this.parentExtent[3] / 2) * this.scale[1] * (this.isSimple ? 1 : (imageScale / 100)) + this.offset[1];
 
 		const transform = composeTransform(
 			this.tempTransform,
@@ -154,11 +155,10 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 
 			if (!this.isSimple) {
 
-				this.drawPatternParallaxLayers(context, img, imageScale, xOffsetFromCenter, yOffsetFromCenter, viewCenter, imageExtent);
+				this.drawPatternParallaxLayers(context, img, viewResolution, xOffsetFromCenter, yOffsetFromCenter, viewCenter, this.parentExtent);
 			
 			} else {
 				context.globalCompositeOperation = 'source-over';
-				console.log(xOffsetFromCenter, yOffsetFromCenter);
 				context.drawImage(
 					img,
 					0,
@@ -199,11 +199,12 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const clientWidth = context.canvas.clientWidth;
 		const clientHeight = context.canvas.clientHeight;
 		
-		const matrixScale = 1 + (imageScale - 1) / 20
-		
+		const matrixScale = Math.max(1 / imageScale, 1);//1 + (imageScale - 1) / 20
+		console.log(matrixScale);
+
 		var matrix = new DOMMatrix();
-		matrix = matrix.translateSelf(-xOffsetFromCenter + (-xOffsetFromCenter * matrixScale), yOffsetFromCenter + (yOffsetFromCenter * matrixScale));
 		matrix = matrix.scaleSelf(matrixScale, matrixScale);
+		matrix = matrix.translateSelf(-xOffsetFromCenter + (-xOffsetFromCenter * matrixScale), yOffsetFromCenter + (yOffsetFromCenter * matrixScale));
 		
 		const pattern = context.createPattern(img, 'repeat');
 		pattern.setTransform(matrix);
@@ -226,8 +227,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			layer.img.executeOnLoad((image, data, isAsync) => {
 				const pattern = data.context.createPattern(image, 'repeat');
 				var matrix = new DOMMatrix();
-				matrix = matrix.translateSelf(-data.xOffsetFromCenter + (-data.xOffsetFromCenter * data.scale), data.yOffsetFromCenter + (data.yOffsetFromCenter * data.scale));
 				matrix = matrix.scaleSelf(data.scale, data.scale);
+				matrix = matrix.translateSelf(-data.xOffsetFromCenter + (-data.xOffsetFromCenter * data.scale), data.yOffsetFromCenter + (data.yOffsetFromCenter * data.scale));
 				pattern.setTransform(matrix);
 				context.fillStyle = pattern;
 				context.globalCompositeOperation = data.composite || 'source-over';

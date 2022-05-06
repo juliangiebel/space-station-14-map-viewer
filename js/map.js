@@ -15,7 +15,8 @@
 		// Map views always need a projection.  Here we just want to map image
 		// coordinates directly to map coordinates, so we create a projection that uses
 		// the image extent in pixels.
-		const extent = [0, 0, 5344, 4864];
+		//const extent = [0, 0, 5344, 4864];
+		const extent = [0, 0, 5056, 4480];
 		const projection = new Projection({
 			code: 'map-image',
 			units: 'pixels',
@@ -84,11 +85,12 @@
 
 		const testLayer = new Parallax([0.1, 0.1], [800,450], {
 			source: new ImageStatic({
-				url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
+				url: './image/misc/singularity.png',
 				interpolate: false,
 				projection: projection,
-				imageExtent: extent,
+				imageExtent: [0, 0, 864, 864],
 			}),
+			extent: extent,
 			simple: true
 		});
 
@@ -96,7 +98,8 @@
 			className: 'test',
 			source: new ImageStatic({
 				//attributions: '© <a href="https://wiki.spacestation14.io/wiki/File:Deltastation.png">Space Station 14 wiki</a>',
-				url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
+				//url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
+				url: 'https://user-images.githubusercontent.com/7806367/166400076-fa54f329-be10-434c-a414-b919013b539e.png',
 				interpolate: false,
 				projection: projection,
 				imageExtent: extent,
@@ -107,7 +110,7 @@
 		const map = new Map({
 			layers: [
 				spaceLayer,
-				//testLayer,
+				testLayer,
 				mapLayer,
 				vectorLayer
 			],
