@@ -75,7 +75,7 @@
 				{
 					url: "https://i.imgur.com/69jsYV1.png",
 					composite: "lighter",
-					parallaxScale: [0.3, 0.3],
+					parallaxScale: [0.4, 0.4],
 				},
 			]
 		})
