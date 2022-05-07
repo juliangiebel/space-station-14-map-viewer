@@ -54,7 +54,6 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const viewResolution = viewState.resolution;
 		const size = frameState.size;
 		const imageScale = (pixelRatio * imageResolution) / (viewResolution * imagePixelRatio);
-		console.log(viewResolution);
 
 		let width = Math.round(size[0] * pixelRatio);
 		let height = Math.round(size[1] * pixelRatio);
@@ -131,7 +130,16 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 
 		if (!this.isSimple) {
 			for (const layer of this.layers) {
-				if (!layer.img) layer.img = new AsyncImage(layer.url);
+				if (!layer.img) {
+					layer.img = new AsyncImage(layer.url);
+					var data = {
+						context: context,
+						layer: layer
+					};
+					layer.img.executeOnLoad((image, data, isAsync) => {
+						data.layer.pattern = data.context.createPattern(image, "repeat");
+					}, data);
+				}
 			}
 		}
 
@@ -213,7 +221,9 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		context.fillRect(0, 0, clientWidth, clientHeight);
 
 		for (const layer of this.layers) {
-			
+			if (!layer.pattern)
+				continue;
+
 			const data = {
 				context: context,
 				viewCenter: viewCenter,
@@ -221,16 +231,17 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * (imageScale / 100) + this.offset[1],
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
-				scale: matrixScale
-			};
-			
+				scale: matrixScale,
+				pattern: layer.pattern
+			};;
+
 			layer.img.executeOnLoad((image, data, isAsync) => {
-				const pattern = data.context.createPattern(image, 'repeat');
 				var matrix = new DOMMatrix();
 				matrix = matrix.scaleSelf(data.scale, data.scale);
 				matrix = matrix.translateSelf(-data.xOffsetFromCenter + (-data.xOffsetFromCenter * data.scale), data.yOffsetFromCenter + (data.yOffsetFromCenter * data.scale));
-				pattern.setTransform(matrix);
-				context.fillStyle = pattern;
+				data.pattern.setTransform(matrix);
+
+				context.fillStyle = data.pattern;
 				context.globalCompositeOperation = data.composite || 'source-over';
 				context.fillRect(0, 0, data.size[0], data.size[1]);
 				
