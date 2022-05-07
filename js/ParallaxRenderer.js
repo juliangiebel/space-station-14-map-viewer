@@ -130,16 +130,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 
 		if (!this.isSimple) {
 			for (const layer of this.layers) {
-				if (!layer.img) {
+				if (!layer.img)
 					layer.img = new AsyncImage(layer.url);
-					var data = {
-						context: context,
-						layer: layer
-					};
-					layer.img.executeOnLoad((image, data, isAsync) => {
-						data.layer.pattern = data.context.createPattern(image, "repeat");
-					}, data);
-				}
 			}
 		}
 
@@ -203,25 +195,46 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 	/**
 	 * @private
 	 */
+	fillWithImage(context, xOffset, yOffset, size, scale, image) {
+		const startX = Math.floor(-xOffset - image.width) % image.width;
+		const startY = Math.floor(yOffset - image.height) % image.height;
+		const w = image.width * scale;
+		const h = image.height * scale;
+
+		var drawX = startX;
+		var drawY = startY;
+		while (true) {
+			context.drawImage(image, drawX, drawY, w, h);
+			drawX += w;
+			if (drawX >= size[0]) {
+				drawX = startX;
+				drawY += h;
+			}
+			if (drawY >= size[1])
+				break;
+		}
+	}
+
+	/**
+	 * @private
+	 */
 	drawPatternParallaxLayers(context, img, imageScale, xOffsetFromCenter, yOffsetFromCenter, viewCenter, imageExtent) {
 		const clientWidth = context.canvas.clientWidth;
 		const clientHeight = context.canvas.clientHeight;
 		
 		const matrixScale = Math.max(1 / imageScale, 1);//1 + (imageScale - 1) / 20
-		console.log(matrixScale);
 
 		var matrix = new DOMMatrix();
 		matrix = matrix.scaleSelf(matrixScale, matrixScale);
-		matrix = matrix.translateSelf(-xOffsetFromCenter + (-xOffsetFromCenter * matrixScale), yOffsetFromCenter + (yOffsetFromCenter * matrixScale));
+		matrix = matrix.translateSelf(-xOffsetFromCenter /*+ (-xOffsetFromCenter * matrixScale)*/, yOffsetFromCenter /*+ (yOffsetFromCenter * matrixScale)*/);
 		
-		const pattern = context.createPattern(img, 'repeat');
-		pattern.setTransform(matrix);
-		context.fillStyle = pattern;
-		context.globalCompositeOperation = 'source-over';
-		context.fillRect(0, 0, clientWidth, clientHeight);
+		if (!this.layers) {
+			context.globalCompositeOperation = 'source-over';
+			this.fillWithImage(context, xOffsetFromCenter, yOffsetFromCenter, [clientWidth, clientHeight], 1, img);
+		}
 
 		for (const layer of this.layers) {
-			if (!layer.pattern)
+			if (!layer.img.loaded)
 				continue;
 
 			const data = {
@@ -231,20 +244,12 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * (imageScale / 100) + this.offset[1],
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
-				scale: matrixScale,
-				pattern: layer.pattern
+				scale: matrixScale
 			};;
 
 			layer.img.executeOnLoad((image, data, isAsync) => {
-				var matrix = new DOMMatrix();
-				matrix = matrix.scaleSelf(data.scale, data.scale);
-				matrix = matrix.translateSelf(-data.xOffsetFromCenter + (-data.xOffsetFromCenter * data.scale), data.yOffsetFromCenter + (data.yOffsetFromCenter * data.scale));
-				data.pattern.setTransform(matrix);
-
-				context.fillStyle = data.pattern;
-				context.globalCompositeOperation = data.composite || 'source-over';
-				context.fillRect(0, 0, data.size[0], data.size[1]);
-				
+				data.context.globalCompositeOperation = data.composite;
+				this.fillWithImage(data.context, data.xOffsetFromCenter, data.yOffsetFromCenter, data.size, data.scale, image);
 				if (isAsync) this.changed();
 			}, data);
 			
