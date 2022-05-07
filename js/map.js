@@ -55,7 +55,7 @@
 
 		const spaceLayer = new Parallax([0.1, 0.1], [0,0], {
 			source: new ImageStatic({
-				url: 'https://i.imgur.com/IannmmK.png',
+				url: 'https://i.imgur.com/3YO8KRd.png',
 				interpolate: false,
 				projection: projection,
 				imageExtent: [0, 0, 6000, 4000],//extent,
@@ -63,22 +63,19 @@
 			}),
 			layers: [
 				{
+					url: "https://i.imgur.com/IannmmK.png",
+					composite: "source-over",
+					parallaxScale: [0.1, 0.1],
+				},
+				{
 					url: "https://i.imgur.com/T3W6JsE.png",
 					composite: "lighter",
 					parallaxScale: [0.2, 0.2],
-					/*
-					opacity: 0.5,
-					offset: [0, 0],
-					*/
 				},
 				{
 					url: "https://i.imgur.com/69jsYV1.png",
 					composite: "lighter",
 					parallaxScale: [0.3, 0.3],
-					/*
-					opacity: 0.5,
-					offset: [0, 0],
-					*/
 				},
 			]
 		})
