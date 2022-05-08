@@ -223,6 +223,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const clientHeight = context.canvas.clientHeight;
 		
 		const matrixScale = Math.max(1 / imageScale, 1);//1 + (imageScale - 1) / 20
+		const parScale = imageScale > 1 ? 1 / imageScale : imageScale;
 
 		var matrix = new DOMMatrix();
 		matrix = matrix.scaleSelf(matrixScale, matrixScale);
@@ -234,14 +235,18 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		}
 
 		for (const layer of this.layers) {
-			if (!layer.img.loaded)
+			if (!layer.img.loaded) {
+				layer.img.executeOnLoad((image, data, isAsync) => {
+					this.changed();
+				});
 				continue;
+			}
 
 			const data = {
 				context: context,
 				viewCenter: viewCenter,
-				xOffsetFromCenter: (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] * matrixScale + this.offset[0],
-				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * matrixScale + this.offset[1],
+				xOffsetFromCenter: (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] * parScale + this.offset[0],
+				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * parScale + this.offset[1],
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
 				scale: matrixScale
