@@ -198,8 +198,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 	fillWithImage(context, xOffset, yOffset, size, scale, image) {
 		const w = image.width * scale;
 		const h = image.height * scale;
-		const startX = Math.floor(-xOffset - image.width) % w;
-		const startY = Math.floor(yOffset - image.height) % h;
+		const startX = ((((size[0] / 2) - Math.floor(xOffset)) % w) - w - w/2) % w;
+		const startY = ((((size[1] / 2) + Math.floor(yOffset)) % h) - h - h/2) % h;
 
 		var drawX = startX;
 		var drawY = startY;
@@ -218,16 +218,9 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 	/**
 	 * @private
 	 */
-	drawPatternParallaxLayers(context, img, imageScale, xOffsetFromCenter, yOffsetFromCenter, viewCenter, imageExtent) {
+	drawPatternParallaxLayers(context, img, pixelSize, xOffsetFromCenter, yOffsetFromCenter, viewCenter, imageExtent) {
 		const clientWidth = context.canvas.clientWidth;
 		const clientHeight = context.canvas.clientHeight;
-		
-		const matrixScale = Math.max(1 / imageScale, 1);//1 + (imageScale - 1) / 20
-		const parScale = imageScale > 1 ? 1 / imageScale : imageScale;
-
-		var matrix = new DOMMatrix();
-		matrix = matrix.scaleSelf(matrixScale, matrixScale);
-		matrix = matrix.translateSelf(-xOffsetFromCenter /*+ (-xOffsetFromCenter * matrixScale)*/, yOffsetFromCenter /*+ (yOffsetFromCenter * matrixScale)*/);
 		
 		if (!this.layers) {
 			context.globalCompositeOperation = 'source-over';
@@ -242,14 +235,17 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 				continue;
 			}
 
+			const parallaxWorldX = (viewCenter[0] * (layer.parallaxScale[0])) + this.offset[0];
+			const parallaxWorldY = (viewCenter[1] * (layer.parallaxScale[1])) + this.offset[1];
+
 			const data = {
 				context: context,
 				viewCenter: viewCenter,
-				xOffsetFromCenter: (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] * parScale + this.offset[0],
-				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * parScale + this.offset[1],
+				xOffsetFromCenter: parallaxWorldX / pixelSize,
+				yOffsetFromCenter: parallaxWorldY / pixelSize,
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
-				scale: matrixScale
+				scale: 1 / pixelSize
 			};;
 
 			layer.img.executeOnLoad((image, data, isAsync) => {
