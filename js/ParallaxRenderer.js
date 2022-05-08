@@ -196,10 +196,10 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 	 * @private
 	 */
 	fillWithImage(context, xOffset, yOffset, size, scale, image) {
-		const startX = Math.floor(-xOffset - image.width) % image.width;
-		const startY = Math.floor(yOffset - image.height) % image.height;
 		const w = image.width * scale;
 		const h = image.height * scale;
+		const startX = Math.floor(-xOffset - image.width) % w;
+		const startY = Math.floor(yOffset - image.height) % h;
 
 		var drawX = startX;
 		var drawY = startY;
