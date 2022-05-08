@@ -240,8 +240,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			const data = {
 				context: context,
 				viewCenter: viewCenter,
-				xOffsetFromCenter: (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] * (imageScale / 100) + this.offset[0],
-				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * (imageScale / 100) + this.offset[1],
+				xOffsetFromCenter: (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] * matrixScale + this.offset[0],
+				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * matrixScale + this.offset[1],
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
 				scale: matrixScale
