@@ -54,7 +54,6 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const viewResolution = viewState.resolution;
 		const size = frameState.size;
 		const imageScale = (pixelRatio * imageResolution) / (viewResolution * imagePixelRatio);
-		console.log(viewResolution);
 
 		let width = Math.round(size[0] * pixelRatio);
 		let height = Math.round(size[1] * pixelRatio);
@@ -131,7 +130,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 
 		if (!this.isSimple) {
 			for (const layer of this.layers) {
-				if (!layer.img) layer.img = new AsyncImage(layer.url);
+				if (!layer.img)
+					layer.img = new AsyncImage(layer.url);
 			}
 		}
 
@@ -195,45 +195,62 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 	/**
 	 * @private
 	 */
-	drawPatternParallaxLayers(context, img, imageScale, xOffsetFromCenter, yOffsetFromCenter, viewCenter, imageExtent) {
+	fillWithImage(context, xOffset, yOffset, size, scale, image) {
+		const w = image.width * scale;
+		const h = image.height * scale;
+		const startX = ((((size[0] / 2) - Math.floor(xOffset)) % w) - w - w/2) % w;
+		const startY = ((((size[1] / 2) + Math.floor(yOffset)) % h) - h - h/2) % h;
+
+		var drawX = startX;
+		var drawY = startY;
+		while (true) {
+			context.drawImage(image, drawX, drawY, w, h);
+			drawX += w;
+			if (drawX >= size[0]) {
+				drawX = startX;
+				drawY += h;
+			}
+			if (drawY >= size[1])
+				break;
+		}
+	}
+
+	/**
+	 * @private
+	 */
+	drawPatternParallaxLayers(context, img, pixelSize, xOffsetFromCenter, yOffsetFromCenter, viewCenter, imageExtent) {
 		const clientWidth = context.canvas.clientWidth;
 		const clientHeight = context.canvas.clientHeight;
 		
-		const matrixScale = Math.max(1 / imageScale, 1);//1 + (imageScale - 1) / 20
-		console.log(matrixScale);
-
-		var matrix = new DOMMatrix();
-		matrix = matrix.scaleSelf(matrixScale, matrixScale);
-		matrix = matrix.translateSelf(-xOffsetFromCenter + (-xOffsetFromCenter * matrixScale), yOffsetFromCenter + (yOffsetFromCenter * matrixScale));
-		
-		const pattern = context.createPattern(img, 'repeat');
-		pattern.setTransform(matrix);
-		context.fillStyle = pattern;
-		context.globalCompositeOperation = 'source-over';
-		context.fillRect(0, 0, clientWidth, clientHeight);
+		if (!this.layers) {
+			context.globalCompositeOperation = 'source-over';
+			this.fillWithImage(context, xOffsetFromCenter, yOffsetFromCenter, [clientWidth, clientHeight], 1, img);
+		}
 
 		for (const layer of this.layers) {
-			
+			if (!layer.img.loaded) {
+				layer.img.executeOnLoad((image, data, isAsync) => {
+					this.changed();
+				});
+				continue;
+			}
+
+			const parallaxWorldX = (viewCenter[0] * (layer.parallaxScale[0])) + this.offset[0];
+			const parallaxWorldY = (viewCenter[1] * (layer.parallaxScale[1])) + this.offset[1];
+
 			const data = {
 				context: context,
 				viewCenter: viewCenter,
-				xOffsetFromCenter: (viewCenter[0] - imageExtent[2] / 2) * layer.parallaxScale[0] * (imageScale / 100) + this.offset[0],
-				yOffsetFromCenter: (viewCenter[1] - imageExtent[3] / 2) * layer.parallaxScale[1] * (imageScale / 100) + this.offset[1],
+				xOffsetFromCenter: parallaxWorldX / pixelSize,
+				yOffsetFromCenter: parallaxWorldY / pixelSize,
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
-				scale: matrixScale
-			};
-			
+				scale: 1 / pixelSize
+			};;
+
 			layer.img.executeOnLoad((image, data, isAsync) => {
-				const pattern = data.context.createPattern(image, 'repeat');
-				var matrix = new DOMMatrix();
-				matrix = matrix.scaleSelf(data.scale, data.scale);
-				matrix = matrix.translateSelf(-data.xOffsetFromCenter + (-data.xOffsetFromCenter * data.scale), data.yOffsetFromCenter + (data.yOffsetFromCenter * data.scale));
-				pattern.setTransform(matrix);
-				context.fillStyle = pattern;
-				context.globalCompositeOperation = data.composite || 'source-over';
-				context.fillRect(0, 0, data.size[0], data.size[1]);
-				
+				data.context.globalCompositeOperation = data.composite;
+				this.fillWithImage(data.context, data.xOffsetFromCenter, data.yOffsetFromCenter, data.size, data.scale, image);
 				if (isAsync) this.changed();
 			}, data);
 			
