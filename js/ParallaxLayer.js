@@ -18,6 +18,8 @@ class Parallax extends BaseImageLayer {
 		this.layers = opt_options.layers;
 		this.parentExtent = opt_options.extent || opt_options.source.getImageExtent();
 		this.isSimple = !!opt_options.simple;
+		this.minScale = opt_options.minScale;
+		this.maxScale = opt_options.maxScale;
 	}
 
 	createRenderer() {
