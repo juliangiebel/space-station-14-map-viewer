@@ -20,6 +20,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		this.scale = parallaxLayer.scale;
 		this.parentExtent = parallaxLayer.parentExtent;
 		this.isSimple = parallaxLayer.isSimple;
+		this.minScale = parallaxLayer.minScale;
+		this.maxScale = parallaxLayer.maxScale;
 		this.changed = () => parallaxLayer.changed();
 	}
 
@@ -226,6 +228,12 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			context.globalCompositeOperation = 'source-over';
 			this.fillWithImage(context, xOffsetFromCenter, yOffsetFromCenter, [clientWidth, clientHeight], 1, img);
 		}
+		
+		var imageScale = 1 / pixelSize;
+		if (this.minScale && imageScale < this.minScale)
+			imageScale = this.minScale;
+		if (this.maxScale && imageScale > this.maxScale)
+			imageScale = this.maxScale;
 
 		for (const layer of this.layers) {
 			if (!layer.img.loaded) {
@@ -235,8 +243,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 				continue;
 			}
 
-			const parallaxWorldX = (viewCenter[0] * (layer.parallaxScale[0])) + this.offset[0];
-			const parallaxWorldY = (viewCenter[1] * (layer.parallaxScale[1])) + this.offset[1];
+			const parallaxWorldX = (viewCenter[0] * layer.parallaxScale[0]) + this.offset[0];
+			const parallaxWorldY = (viewCenter[1] * layer.parallaxScale[1]) + this.offset[1];
 
 			const data = {
 				context: context,
@@ -245,8 +253,8 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 				yOffsetFromCenter: parallaxWorldY / pixelSize,
 				composite: layer.composite,
 				size: [clientWidth, clientHeight],
-				scale: 1 / pixelSize
-			};;
+				scale: imageScale
+			};
 
 			layer.img.executeOnLoad((image, data, isAsync) => {
 				data.context.globalCompositeOperation = data.composite;
