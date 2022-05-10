@@ -59,7 +59,7 @@
 				interpolate: false,
 				projection: projection,
 				imageExtent: [0, 0, 6000, 4000],//extent,
-				imageSmoothing: false
+				imageSmoothing: false,
 			}),
 			layers: [
 				{
@@ -77,7 +77,8 @@
 					composite: "lighter",
 					parallaxScale: [0.3, 0.3],
 				},
-			]
+			],
+			minScale: 1
 		})
 
 		const testLayer = new Parallax([0.1, 0.1], [800,450], {
@@ -118,7 +119,7 @@
 				//zoom: 2,
 				//maxZoom: 7
 				zoom: 1,
-				resolutions: [8, 4, 2, 1, 1 / 2, 1 / 4],
+				resolutions: [4, 2, 1, 1 / 2, 1 / 4],
 				constrainResolution: true,
 			}),
 		});
@@ -128,16 +129,16 @@
 		});
 
 		mapLayer.on('prerender', function (evt) {
-			if (evt.frameState.viewState.zoom > 3) {
-				evt.context.imageSmoothingEnabled = false;
-				evt.context.webkitImageSmoothingEnabled = false;
-				evt.context.mozImageSmoothingEnabled = false;
-				evt.context.msImageSmoothingEnabled = false;
-			} else {
+			if (evt.frameState.viewState.zoom < 2) {
 				evt.context.imageSmoothingEnabled = true;
 				evt.context.webkitImageSmoothingEnabled = true;
 				evt.context.mozImageSmoothingEnabled = true;
 				evt.context.msImageSmoothingEnabled = true;
 				evt.context.imageSmoothingQuality = "high";
+			} else {
+				evt.context.imageSmoothingEnabled = false;
+				evt.context.webkitImageSmoothingEnabled = false;
+				evt.context.mozImageSmoothingEnabled = false;
+				evt.context.msImageSmoothingEnabled = false;
 			}
 		});
