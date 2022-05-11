@@ -1,4 +1,6 @@
 {
+	"type": "link",
+	"version": "1.0",
 	"provider_name": "Space Station 14.",
 	"provider_url": "https://spacestation14.io"
 }
