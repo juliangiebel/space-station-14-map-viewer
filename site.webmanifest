@@ -1,0 +1,20 @@
+{
+    "name": "Map View",
+    "short_name": "Map View",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#334e6d",
+    "background_color": "#334e6d",
+    "start_url": "maps14.tanukij.dev",
+    "display": "standalone"
+}
