@@ -12,18 +12,131 @@
 		import ImageStatic from "ol/source/ImageStatic";
 		import Parallax from "./ParallaxLayer";
 
-		// Map views always need a projection.  Here we just want to map image
-		// coordinates directly to map coordinates, so we create a projection that uses
-		// the image extent in pixels.
-		//const extent = [0, 0, 5344, 4864];
-		const extent = [0, 0, 5056, 4480];
-		const projection = new Projection({
-			code: 'map-image',
-			units: 'pixels',
-			extent: extent,
-		});
+		let map = null;
+		const query = new URLSearchParams(window.location.search);
+		const defaultMap = 'bagelstation';
 
-		const marker = new Feature({
+		const mapName = query.has('map') ? query.get('map').toLowerCase() : defaultMap;
+
+		//if (query.has('map')) {
+			loadMapJson(mapName)
+				.then(data => {
+					map = createMap(data);
+					document.map = map;
+				});
+		//}
+
+		function createMap(data) {
+			//const extent = [0, 0, 5056, 4480];
+			const projection = new Projection({
+				code: 'map-image',
+				units: 'pixels',
+				extent: data.extent,
+			});
+
+			const parallaxLayers = new Array();
+
+			for (const parallaxData of data.parallax) {
+
+				const source = new ImageStatic({
+					url: parallaxData.source.url,
+					imageExtent: parallaxData.source.extent,
+					interpolate: false,
+					projection: projection
+				});
+				
+				const parallax = new Parallax(parallaxData.scale, parallaxData.offset, {
+					simple: parallaxData.simple, 
+					//extent: data.extent,
+					minScale: parallaxData.minScale,
+					layers: parallaxData.layers,
+					source: source
+				});
+
+				parallaxLayers.push(parallax);
+			}
+
+			let mapLayer;
+
+			if (data.tiled) {
+				//TODO: Implement map tiling
+				mapLayer = new Image({
+					//className: 'map',
+					source: new ImageStatic({
+						attributions: data.attributions,
+						url: data.url,
+						interpolate: false,
+						projection: projection,
+						imageExtent: data.extent,
+						imageSmoothing: false
+					}),
+				});
+
+			} else {
+				
+				mapLayer = new Image({
+					//className: 'map',
+					source: new ImageStatic({
+						attributions: data.attributions,
+						url: data.url,
+						interpolate: false,
+						projection: projection,
+						imageExtent: data.extent,
+						imageSmoothing: false
+					}),
+				});
+			
+			}
+
+			const map = new Map({
+				layers: [
+					...parallaxLayers,
+					mapLayer
+				],
+				target: 'map',
+				view: new View({
+					projection: projection,
+					center: getCenter(data.extent),
+					zoom: 1,
+					resolutions: [4, 2, 1, 1 / 2, 1 / 4],
+					constrainResolution: true,
+				}),
+			});
+
+			map.on('singleclick', function (evt) {
+				console.log(evt.coordinate);
+			});
+
+			mapLayer.on('prerender', function (evt) {
+				if (evt.frameState.viewState.zoom < 2) {
+					evt.context.imageSmoothingEnabled = true;
+					evt.context.webkitImageSmoothingEnabled = true;
+					evt.context.mozImageSmoothingEnabled = true;
+					evt.context.msImageSmoothingEnabled = true;
+					evt.context.imageSmoothingQuality = "high";
+				} else {
+					evt.context.imageSmoothingEnabled = false;
+					evt.context.webkitImageSmoothingEnabled = false;
+					evt.context.mozImageSmoothingEnabled = false;
+					evt.context.msImageSmoothingEnabled = false;
+				}
+			});
+
+			return map;
+		}
+		
+
+		async function loadMapJson(name) {
+			const request = new Request(`maps/${ name }/map.json`);
+			const response = await fetch(request);
+			if (!response.ok) {
+				throw new Error(`Failed to retrive map data! Status: ${response.status}`);
+			}
+			return await response.json();
+		}
+
+
+				/*const marker = new Feature({
 			geometry: new Point([550, 130])
 		});
 
@@ -51,9 +164,10 @@
 			source: new VectorSource({
 				//features: [marker]
 			})
-		});
+		});*/
 
-		const spaceLayer = new Parallax([0.1, 0.1], [0,0], {
+		
+		/*const spaceLayer = new Parallax([0.1, 0.1], [0,0], {
 			source: new ImageStatic({
 				url: 'https://i.imgur.com/3YO8KRd.png',
 				interpolate: false,
@@ -88,57 +202,6 @@
 				projection: projection,
 				imageExtent: [0, 0, 864, 864],
 			}),
-			extent: extent,
+			extent: data.extent,
 			simple: true
-		});
-
-		const mapLayer = new Image({
-			className: 'test',
-			source: new ImageStatic({
-				//attributions: '© <a href="https://wiki.spacestation14.io/wiki/File:Deltastation.png">Space Station 14 wiki</a>',
-				//url: 'https://user-images.githubusercontent.com/7806367/164307499-dc5b8e8a-af21-4ddb-904b-6b7c17e99cde.png',
-				url: 'https://user-images.githubusercontent.com/7806367/166400076-fa54f329-be10-434c-a414-b919013b539e.png',
-				interpolate: false,
-				projection: projection,
-				imageExtent: extent,
-				imageSmoothing: false
-			}),
-		});
-
-		const map = new Map({
-			layers: [
-				spaceLayer,
-				testLayer,
-				mapLayer,
-				vectorLayer
-			],
-			target: 'map',
-			view: new View({
-				projection: projection,
-				center: getCenter(extent),
-				//zoom: 2,
-				//maxZoom: 7
-				zoom: 1,
-				resolutions: [4, 2, 1, 1 / 2, 1 / 4],
-				constrainResolution: true,
-			}),
-		});
-
-		map.on('singleclick', function (evt) {
-			console.log(evt.coordinate);
-		});
-
-		mapLayer.on('prerender', function (evt) {
-			if (evt.frameState.viewState.zoom < 2) {
-				evt.context.imageSmoothingEnabled = true;
-				evt.context.webkitImageSmoothingEnabled = true;
-				evt.context.mozImageSmoothingEnabled = true;
-				evt.context.msImageSmoothingEnabled = true;
-				evt.context.imageSmoothingQuality = "high";
-			} else {
-				evt.context.imageSmoothingEnabled = false;
-				evt.context.webkitImageSmoothingEnabled = false;
-				evt.context.mozImageSmoothingEnabled = false;
-				evt.context.msImageSmoothingEnabled = false;
-			}
-		});
+		});*/
