@@ -191,6 +191,9 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			canvas.style.transform = canvasTransform;
 		}
 
+		//Reset composition operation
+		context.globalCompositeOperation = 'source-over';
+
 		return this.container;
 	}
 
