@@ -40,3 +40,28 @@ canvas {
     width: 100%;
     background-color: #060913;
 }
+
+.hidden {
+    display: none;
+}
+
+#map-selector {
+    top: 65px;
+    left: .5rem;
+    min-width: 120px;;
+}
+
+#map-selector > .selected-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+#map-selector .selected-label {
+    margin: 0;
+    width: 100%;
+}
+
+#map-selector-maps > button {
+    width: 100%;
+}
