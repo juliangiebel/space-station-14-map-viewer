@@ -19,7 +19,7 @@ The map selector is populated using the *list.json* file under *maps/list.json*
 The file structure needs to follow the following example:
 
 - maps
-    list.json
+    - list.json
     - {mapid}
         - map.json
         - {image}.png
@@ -27,44 +27,84 @@ The file structure needs to follow the following example:
     - {mapid}
      - ...
 
-### map.json:
+### Example map.json:
 ```json
-    {
-	"id": "{map id}", //(Must be the same as the folder name)
-	"name": "{map name}",
-	"tiled": false, //Whether the map uses tiles instead of one image (Not yet implemented!)
-	"url": "{map image url}", //The url to the map image used. Can be an external url
-	"extent": [x1, y1, x2, y2], //The size of the image in px
-    "attributions": "{Map author}",
-    "parallax": [
-		{
-			"scale": [0.1, 0.1],
-			"offset": [0, 0],
-			"simple": false, //If a parallax is marked as simple it doesn't tile and doesn't use layers
-			"minScale": 1, //This needs to be 1
-			"source": {
-				"url": "{parallax base image url}",
-				"extent": [x1, y1, x2, y2]
-			},
-			"layers": [
-				{
-					"url": "{parallax layer url}",
-					"composite": "{image composition}", //see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
-					"parallaxScale": [0.1, 0.1]
-				},
-				...
-			]
-		},
+{
+    "Id": "Saltern", //(Must be the same as the folder name)
+    "Name": "Saltern",
+    "Grids": [ //Maps can contain multiple grids
+        {
+            "GridId": "854", //The grid id is used for positioning markers relative to a grid
+            "Offset": { //Every grid other than the first one is positioned on the map accordng the their offset
+                "X": 83.37305,
+                "Y": -861.07245
+            },
+            "Tiled": false, //Whether the map uses tiles instead of one image (Not yet implemented!)
+            "Url": "Saltern\\Saltern-0.webp", //The url to the map image used. Can be an external url
+            "Extent": { //The size of the image in px
+                "X1": 0.0,
+                "Y1": 0.0,
+                "X2": 4032.0,
+                "Y2": 2368.0
+            }
+        }
+    ],
+    "Attributions": null,
+    "ParallaxLayers": [
+        {
+            "Scale": {
+                "X": 0.1,
+                "Y": 0.1
+            },
+            "Offset": {
+                "X": 0.0,
+                "Y": 0.0
+            },
+            "Static": false, //If a parallax is marked as static it doesn't tile and doesn't use layers
+            "MinScale": null, //Defaults to 1
+            "Source": {
+                "Url": "https://i.imgur.com/3YO8KRd.png",
+                "Extent": {
+                    "X1": 0.0,
+                    "Y1": 0.0,
+                    "X2": 6000.0,
+                    "Y2": 4000.0
+                }
+            },
+            "Layers": [
+                {
+                    "Url": "https://i.imgur.com/IannmmK.png",
+                    "Composition": "source-over", //see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+                    "ParallaxScale": {
+                        "X": 0.1,
+                        "Y": 0.1
+                    }
+                },
+                ...
+            ]
+        }
 		{ //A simple parallax layer
-			"scale": [0.1, 0.1],
-			"offset": [800,450],
-			"simple": true,
-			"source": {
-				"url": "./image/misc/singularity.png",
-				"extent": [0, 0, 864, 864]
-			}
+			 "Scale": {
+                "X": 0.1,
+                "Y": 0.1
+            },
+            "Offset": {
+                "X": 0.0,
+                "Y": 0.0
+            },
+            "Static": true,
+            "MinScale": null,
+            "Source": {
+                "Url": "https://i.imgur.com/3YO8KRd.png",
+                "Extent": {
+                    "X1": 0.0,
+                    "Y1": 0.0,
+                    "X2": 6000.0,
+                    "Y2": 4000.0
+                }
+            }
 		}
-	]
+    ]
 }
 ```
 
