@@ -47,12 +47,10 @@ class MapSelector extends Control {
 
 	handleMapChange(selected) {
 		const map = this.getMap();
-		MapLoader.loadLayers(map, selected.id);
+		MapLoader.loadLayers(map, selected.id).then(() => this.mapChangeCallback(selected, map));
 		
 		this.selected = selected;
 		this.updateList();
-
-		this.mapChangeCallback(selected);
 	}
 
 	updateList() {

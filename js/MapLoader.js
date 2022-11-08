@@ -21,7 +21,7 @@ class MapLoader {
 	}
 
 	static async loadLayers(map, name) {
-		this.loadMapJson(name)
+		return this.loadMapJson(name)
 			.then(data => {
 				const projection = new Projection({
 					code: 'map-image',
