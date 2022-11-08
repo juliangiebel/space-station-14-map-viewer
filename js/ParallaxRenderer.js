@@ -133,7 +133,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		if (!this.isSimple) {
 			for (const layer of this.layers) {
 				if (!layer.img)
-					layer.img = new AsyncImage(layer.url);
+					layer.img = new AsyncImage(layer.Url);
 			}
 		}
 
@@ -246,15 +246,15 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 				continue;
 			}
 
-			const parallaxWorldX = (viewCenter[0] * layer.parallaxScale[0]) + this.offset[0];
-			const parallaxWorldY = (viewCenter[1] * layer.parallaxScale[1]) + this.offset[1];
+			const parallaxWorldX = (viewCenter[0] * layer.ParallaxScale.X) + this.offset[0];
+			const parallaxWorldY = (viewCenter[1] * layer.ParallaxScale.Y) + this.offset[1];
 
 			const data = {
 				context: context,
 				viewCenter: viewCenter,
 				xOffsetFromCenter: parallaxWorldX / pixelSize,
 				yOffsetFromCenter: parallaxWorldY / pixelSize,
-				composite: layer.composite,
+				composite: layer.Composition,
 				size: [clientWidth, clientHeight],
 				scale: imageScale
 			};
