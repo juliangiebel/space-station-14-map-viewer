@@ -1,53 +1,33 @@
 import MapLoader from "./MapLoader";
 import MapSelector from "./MapSelector";
+import Markers from "./Markers";
 
 let map = null;
 const query = new URLSearchParams(window.location.search);
 const defaultMap = 'default';
 
 const mapId = query.has('map') ? query.get('map').toLowerCase() : defaultMap;
+const hideSelector = query.has('no-selector');
 
-function onMapChangedHandler(map) {
+function getMarkers()
+{
+	return query.has('markers') ? Markers.parseMarkerList(query.get('markers')) : [];
+}
+
+function onMapChangedHandler(selectedMap, map) {
 	const url = new URL(window.location);
-	url.searchParams.set('map', map.id);
+	url.searchParams.set('map',selectedMap.id);
 	window.history.pushState({}, '', url);
+	map.addLayer(Markers.drawMarkerLayer(getMarkers()));
 }
 
 MapLoader.loadMap(mapId).then((loadedMap) => {
 	map = loadedMap
-	map.addControl(new MapSelector({selected: {name: loadedMap.get('map-name'), id: mapId}, onMapChanged: onMapChangedHandler}));
+	
+	if (!hideSelector) map.addControl(new MapSelector({selected: {name: loadedMap.get('map-name'), id: mapId}, onMapChanged: onMapChangedHandler}));
+	
+	map.addLayer(Markers.drawMarkerLayer(getMarkers()));
 });
-
-		/*const marker = new Feature({
-	geometry: new Point([550, 130])
-});
-
-const fill = new Fill({
-	color: 'rgba(0,0,255,0.4)',
-});
-const stroke = new Stroke({
-	color: '#3399CC',
-	width: 1.25,
-});
-
-marker.setStyle(
-	new Style({
-		image: new Circle({
-			fill: fill,
-			stroke: stroke,
-			radius: 10,
-		}),
-		fill: fill,
-		stroke: stroke,
-	})
-);
-
-const vectorLayer = new VectorLayer({
-	source: new VectorSource({
-		//features: [marker]
-	})
-});*/
-
 
 /*const spaceLayer = new Parallax([0.1, 0.1], [0,0], {
 	source: new ImageStatic({
