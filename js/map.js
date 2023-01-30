@@ -4,7 +4,7 @@ import Markers from "./Markers";
 
 let map = null;
 const query = new URLSearchParams(window.location.search);
-const defaultMap = 'Box';
+const defaultMap = 'box';
 
 const mapId = query.has('map') ? query.get('map').toLowerCase() : defaultMap;
 const hideSelector = query.has('no-selector');
