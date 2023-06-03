@@ -4,6 +4,7 @@ import Projection from "ol/proj/Projection";
 import Image from "ol/layer/Image"
 import ImageStatic from "ol/source/ImageStatic";
 import Parallax from "./ParallaxLayer";
+import Config from "./Config.js";
 
 class MapLoader {
 	static async loadMap(mapName) {
@@ -12,28 +13,31 @@ class MapLoader {
 	}
 
 	static async loadMapJson(name) {
-		const request = new Request(`maps/${ name }/map.json`);
+		//maps/{1}/map.json
+		const request = new Request(Config.format(window.config.mapDataUrl, name));
 		const response = await fetch(request);
 		if (!response.ok) {
 			throw new Error(`Failed to retrive map data! Status: ${response.status}`);
 		}
-		return await response.json();
+		const data = await response.json();
+		data.grids = data.grids.sort((a, b) => a.gridId > b.gridId );
+		return data;
 	}
 
 	static async loadLayers(map, name) {
 		return this.loadMapJson(name)
 			.then(data => {
-				const map0Extent = data.Grids[0].Extent;
+				const map0Extent = data.grids[0].extent;
 
 				const projection = new Projection({
 					code: 'map-image',
 					units: 'pixels',
-					extent: [map0Extent.X1, map0Extent.Y1, map0Extent.X2, map0Extent.Y2],
+					extent: [map0Extent.a.x, map0Extent.a.y, map0Extent.b.x, map0Extent.b.y],
 				});
 
 				const view = new View({
 					projection: projection,
-					center: getCenter([map0Extent.X1, map0Extent.Y1, map0Extent.X2, map0Extent.Y2]),
+					center: getCenter([map0Extent.a.x, map0Extent.a.y, map0Extent.b.x, map0Extent.b.y]),
 					zoom: 1,
 					resolutions: [4, 2, 1, 1 / 2, 1 / 4],
 					constrainResolution: true,
@@ -46,13 +50,12 @@ class MapLoader {
 	}
 
 	static createMap(data) {
-
-		const map0Extent = data.Grids[0].Extent;
+		const map0Extent = data.grids[0].extent;
 
 		const projection = new Projection({
 			code: 'map-image',
 			units: 'pixels',
-			extent: [map0Extent.X1, map0Extent.Y1, map0Extent.X2, map0Extent.Y2],
+			extent: [map0Extent.a.x, map0Extent.a.y, map0Extent.b.x, map0Extent.b.y],
 		});
 
 		const layers = this.createLayers(data, projection);
@@ -62,7 +65,7 @@ class MapLoader {
 			target: 'map',
 			view: new View({
 				projection: projection,
-				center: getCenter([map0Extent.X1, map0Extent.Y1, map0Extent.X2, map0Extent.Y2]),
+				center: getCenter([map0Extent.a.x, map0Extent.a.y, map0Extent.b.x, map0Extent.b.y]),
 				zoom: 1,
 				resolutions: [4, 2, 1, 1 / 2, 1 / 4],
 				constrainResolution: true,
@@ -73,7 +76,7 @@ class MapLoader {
 			console.log(evt.coordinate);
 		});
 
-		map.set('map-name', data.Name);
+		map.set('map-name', data.displayName);
 
 		return map;
 	}
@@ -88,48 +91,64 @@ class MapLoader {
 
 		const parallaxLayers = new Array();
 
-		if (data.ParallaxLayers != undefined) {
-			for (const parallaxData of data.ParallaxLayers) {
+		if (data.parallaxLayers != undefined) {
+			for (const parallaxData of data.parallaxLayers) {
 
-				let extent = parallaxData.Source.Extent;
+				let extent = parallaxData.source.extent;
 
 				const source = new ImageStatic({
-					url: parallaxData.Source.Url,
-					imageExtent: [extent.X1, extent.Y1, extent.X2, extent.Y2],
+					url: parallaxData.source.url,
+					imageExtent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
 					interpolate: false,
 					projection: projection
 				});
 				
-				const parallax = new Parallax([parallaxData.Scale.X, parallaxData.Scale.Y], [parallaxData.Offset.X, parallaxData.Offset.Y], {
-					simple: parallaxData.Static, 
+				const parallax = new Parallax([parallaxData.scale.x, parallaxData.scale.y], [parallaxData.offset.x, parallaxData.offset.y], {
+					simple: parallaxData.static,
 					//extent: data.extent,
 					minScale: 1,
-					layers: parallaxData.Layers,
+					layers: parallaxData.layers,
 					source: source
 				});
-	
+
+				parallax.on('prerender', function (evt) {
+					if (evt.frameState.viewState.zoom < 2) {
+						evt.context.imageSmoothingEnabled = true;
+						evt.context.webkitImageSmoothingEnabled = true;
+						evt.context.mozImageSmoothingEnabled = true;
+						evt.context.msImageSmoothingEnabled = true;
+						evt.context.imageSmoothingQuality = "high";
+					} else {
+						evt.context.imageSmoothingEnabled = false;
+						evt.context.webkitImageSmoothingEnabled = false;
+						evt.context.mozImageSmoothingEnabled = false;
+						evt.context.msImageSmoothingEnabled = false;
+					}
+				});
+
 				parallaxLayers.push(parallax);
 			}
 		}
 
 
-		const baseGridOffset = data.Grids[0].Offset;
-		const baseGridExtent = data.Grids[0].Extent;
+		const baseGridOffset = data.grids[0].offset;
+		const baseGridExtent = data.grids[0].extent;
 
 		const gridLayers = new Array();
 
 		let i = 0;
-		for(const gridLayer of data.Grids)
+		for(const gridLayer of data.grids)
 		{
 			let mapLayer;
-			var extent = gridLayer.Extent;
+			var extent = gridLayer.extent;
 			
 			if (i > 0)
 			{
-				extent.X1 -= 4.12 * gridLayer.Offset.X;
-				extent.Y1 += baseGridExtent.Y2 + 36 * gridLayer.Offset.Y;
-				extent.X2 -= 4.12 * gridLayer.Offset.X;
-				extent.Y2 += baseGridExtent.Y2 + 36 * gridLayer.Offset.Y;
+				extent.a.x -= /*4.12 **/ gridLayer.offset.x - extent.b.x;
+				extent.a.y += baseGridExtent.b.y - baseGridOffset.y - 4.5 * gridLayer.offset.y;
+				extent.b.x -= /*4.12 **/ gridLayer.offset.x - extent.b.x;
+				extent.b.y += baseGridExtent.b.y - baseGridOffset.y - 4.5 * gridLayer.offset.y;
+				console.log(extent);
 			}
 
 			/*const projection = new Projection({
@@ -138,18 +157,18 @@ class MapLoader {
 				extent: [extent.X1, extent.Y1, extent.X2, extent.Y2],
 			});*/
 
-			console.log(gridLayer.Url);
+			console.log(gridLayer.url);
 
-			if (gridLayer.Tiled) {
+			if (gridLayer.tiled) {
 				//TODO: Implement map tiling
 				mapLayer = new Image({
 					//className: 'map',
 					source: new ImageStatic({
-						attributions: gridLayer.Attributions,
-						url: gridLayer.Url,
+						attributions: gridLayer.attributions,
+						url: gridLayer.url,
 						interpolate: false,
 						projection: projection,
-						imageExtent: [extent.X1, extent.Y1, extent.X2, extent.Y2],
+						imageExtent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
 						imageSmoothing: false
 					}),
 				});
@@ -158,11 +177,11 @@ class MapLoader {
 				
 				mapLayer = new Image({
 					source: new ImageStatic({
-						attributions: gridLayer.Attributions,
-						url: gridLayer.Url,
+						attributions: gridLayer.attributions,
+						url: gridLayer.url,
 						interpolate: false,
 						projection: projection,
-						imageExtent: [extent.X1, extent.Y1, extent.X2, extent.Y2],
+						imageExtent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
 						imageSmoothing: false
 					}),
 				});

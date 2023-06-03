@@ -1,0 +1,5 @@
+{
+  "defaultMap": "box",
+  "mapListUrl": "https://localhost:7154/api/Map/list/master",
+  "mapDataUrl": "https://localhost:7154/api/Map/{1}/master"
+}

@@ -70,10 +70,11 @@ class MapSelector extends Control {
 	}
 
 	static async loadMapList() {
-		const request = new Request(`maps/list.json`);
+		//'maps/list.json'
+		const request = new Request(window.config.mapListUrl);
 		const response = await fetch(request);
 		if (!response.ok) {
-			throw new Error(`Failed to retrive map list! Status: ${response.status}`);
+			throw new Error(`Failed to retrieve map list! Status: ${response.status}`);
 		}
 		return await response.json();
 	}
