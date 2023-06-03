@@ -1,9 +1,7 @@
 import { fromUserExtent } from "ol/proj";
 import Parallax from "./ParallaxLayer";
-import { IMAGE_SMOOTHING_DISABLED, IMAGE_SMOOTHING_ENABLED } from "ol/src/renderer/canvas/common";
 import CanvasImageLayerRenderer from "ol/renderer/canvas/ImageLayer";
 import { compose as composeTransform, makeInverse, toString as toTransformString } from "ol/transform";
-import { assign } from "ol/obj";
 import { containsExtent, intersects as intersectsExtent } from "ol/extent";
 import AsyncImage from "./AsyncImage";
 
@@ -91,7 +89,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const context = this.context;
 		const canvas = context.canvas;
 
-		if (canvas.width != width || canvas.height != height) {
+		if (canvas.width !== width || canvas.height !== height) {
 			canvas.width = width;
 			canvas.height = height;
 		} else if (!this.containerReused) {
@@ -140,9 +138,9 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		const dw = img.width * transform[0];
 		const dh = img.height * transform[3];
 
-		if (!this.getLayer().getSource().getInterpolate()) {
-			assign(context, IMAGE_SMOOTHING_DISABLED);
-		}
+		//if (!this.getLayer().getSource().getInterpolate()) {
+			//Image smoothing used to be disabled here
+		//}
 
 		this.preRender(context, frameState);
 		if (render && dw >= 0.5 && dh >= 0.5) {
@@ -185,7 +183,6 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 		if (clipped) {
 			context.restore();
 		}
-		assign(context, IMAGE_SMOOTHING_ENABLED);
 
 		if (canvasTransform !== canvas.style.transform) {
 			canvas.style.transform = canvasTransform;
@@ -242,7 +239,7 @@ class ParallaxRenderer extends CanvasImageLayerRenderer {
 			if (!layer.img.loaded) {
 				layer.img.executeOnLoad((image, data, isAsync) => {
 					this.changed();
-				});
+				}, undefined);
 				continue;
 			}
 

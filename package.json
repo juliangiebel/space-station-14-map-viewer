@@ -1,18 +1,18 @@
 {
-  "name": "map-viewer",
+  "name": "ss14-mapviewer",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/ajv": "^1.0.0",
-    "vite": "^2.9.7"
+    "vite": "^4.3.9"
   },
   "dependencies": {
-    "ajv": "^8.11.0",
-    "ol": "^6.14.1"
+    "ajv": "^8.12.0",
+    "ol": "^7.4.0"
   }
 }
