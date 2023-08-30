@@ -1,10 +1,13 @@
-import { Map, View } from "ol";
+import {ImageTile, Map, View} from "ol";
 import { getCenter } from "ol/extent";
 import Projection from "ol/proj/Projection";
 import Image from "ol/layer/Image"
 import ImageStatic from "ol/source/ImageStatic";
 import Parallax from "./ParallaxLayer";
 import Config from "./Config.js";
+import TileLayer from "ol/layer/Tile.js";
+import {XYZ} from "ol/source.js";
+import TileGrid from "ol/tilegrid/TileGrid.js";
 
 class MapLoader {
 	static async loadMap(mapName) {
@@ -161,23 +164,30 @@ class MapLoader {
 
 			if (gridLayer.tiled) {
 				//TODO: Implement map tiling
-				mapLayer = new Image({
+				mapLayer = new TileLayer({
 					//className: 'map',
-					source: new ImageStatic({
-						attributions: gridLayer.attributions,
-						url: gridLayer.url,
+					extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
+					preload: 0,
+					source: new XYZ({
+						attributions: data.attributions,
+						url: "https://" + gridLayer.url.replace(/https?:\/\//, "") + "/{x}/{y}/{z}",
+						tileGrid: new TileGrid({
+							extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
+							maxZoom: 0,
+							resolutions: [1],
+							tileSize: [gridLayer.tileSize, gridLayer.tileSize],
+						}),
 						interpolate: false,
 						projection: projection,
-						imageExtent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
-						imageSmoothing: false
-					}),
+						wrapX: false
+					})
 				});
 
 			} else {
 				
 				mapLayer = new Image({
 					source: new ImageStatic({
-						attributions: gridLayer.attributions,
+						attributions: data.attributions,
 						url: gridLayer.url,
 						interpolate: false,
 						projection: projection,
