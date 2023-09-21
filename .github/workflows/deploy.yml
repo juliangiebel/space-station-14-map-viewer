@@ -23,6 +23,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/checkout@v4
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -31,11 +33,6 @@ jobs:
           tags: |
             type=raw,value=latest
             type=raw,value=${{steps.get-version.outputs.version}}
-
-      - name: Debug
-        run: |
-          ls
-          pwd
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
