@@ -7,6 +7,6 @@ ENV NODE_ENV production
 COPY . .
 RUN npm install vite
 RUN npm install
-RUN npm run build
+RUN vite build
 
-ENTRYPOINT ["npm", "run", "preview"]
+ENTRYPOINT ["vite", "preview"]
