@@ -32,10 +32,16 @@ jobs:
             type=raw,value=latest
             type=raw,value=${{steps.get-version.outputs.version}}
 
+      - name: Debug
+        run: |
+          ls
+          pwd
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
