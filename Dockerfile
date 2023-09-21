@@ -5,8 +5,8 @@ WORKDIR /app
 ENV NODE_ENV production
 
 COPY . .
-RUN npm install vite
+RUN npm install vite -g
 RUN npm install
-RUN vite build
+RUN npm run build
 
-ENTRYPOINT ["vite", "preview"]
+ENTRYPOINT ["npm", "run", "preview"]
