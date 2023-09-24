@@ -9,4 +9,4 @@ RUN npm install vite -g
 RUN npm install
 RUN npm run build
 
-ENTRYPOINT ["npm", "run", "preview", "--host"]
+ENTRYPOINT ["npm", "run", "preview", "--", "--host"]
