@@ -151,7 +151,7 @@ class MapLoader {
 				extent.a.y += baseGridExtent.b.y - baseGridOffset.y - 4.5 * gridLayer.offset.y;
 				extent.b.x -= /*4.12 **/ gridLayer.offset.x - extent.b.x;
 				extent.b.y += baseGridExtent.b.y - baseGridOffset.y - 4.5 * gridLayer.offset.y;
-				console.log(extent);
+				//console.log(extent);
 			}
 
 			/*const projection = new Projection({
@@ -160,14 +160,13 @@ class MapLoader {
 				extent: [extent.X1, extent.Y1, extent.X2, extent.Y2],
 			});*/
 
-			console.log(gridLayer.url);
+			//console.log(gridLayer.url);
 
 			if (gridLayer.tiled) {
 				//TODO: Implement map tiling
 				mapLayer = new TileLayer({
 					//className: 'map',
 					extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
-					preload: 0,
 					source: new XYZ({
 						attributions: data.attributions,
 						url: "https://" + gridLayer.url.replace(/https?:\/\//, "") + "/{x}/{y}/{z}",
