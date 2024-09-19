@@ -8,6 +8,7 @@ import Config from "./Config.js";
 import TileLayer from "ol/layer/Tile.js";
 import {XYZ} from "ol/source.js";
 import TileGrid from "ol/tilegrid/TileGrid.js";
+import TileImagePreloader from "./TileImagePreloader.js";
 
 class MapLoader {
 	static async loadMap(mapName) {
@@ -66,6 +67,7 @@ class MapLoader {
 		const map = new Map({
 			layers: layers,
 			target: 'map',
+			maxTilesLoading: 20,
 			view: new View({
 				projection: projection,
 				center: getCenter([map0Extent.a.x, map0Extent.a.y, map0Extent.b.x, map0Extent.b.y]),
@@ -163,12 +165,12 @@ class MapLoader {
 			//console.log(gridLayer.url);
 
 			if (gridLayer.tiled) {
-				//TODO: Implement map tiling
 				mapLayer = new TileLayer({
 					//className: 'map',
 					extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
 					source: new XYZ({
 						attributions: data.attributions,
+						tileLoadFunction: TileImagePreloader.load,
 						url: "https://" + gridLayer.url.replace(/https?:\/\//, "") + "/{x}/{y}/{z}",
 						tileGrid: new TileGrid({
 							extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],

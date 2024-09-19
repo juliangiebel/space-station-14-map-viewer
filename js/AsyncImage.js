@@ -21,7 +21,7 @@ class AsyncImage {
 
     /**
      * 
-     * @param {(image: Image, data: any) => void} callback A function that gets executed when the image is loaded
+     * @param {(image: HTMLImageElement, data: any) => void} callback A function that gets executed when the image is loaded
      * @param {*} data additional data to pass to that function
      */
     executeOnLoad(callback, data) {
