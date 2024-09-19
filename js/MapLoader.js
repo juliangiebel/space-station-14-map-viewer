@@ -166,11 +166,11 @@ class MapLoader {
 
 			if (gridLayer.tiled) {
 				mapLayer = new TileLayer({
-					//className: 'map',
 					extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
+					updateWhileInteracting: true,
+					updateWhileAnimating: true,
 					source: new XYZ({
 						attributions: data.attributions,
-						tileLoadFunction: TileImagePreloader.load,
 						url: "https://" + gridLayer.url.replace(/https?:\/\//, "") + "/{x}/{y}/{z}",
 						tileGrid: new TileGrid({
 							extent: [extent.a.x, extent.a.y, extent.b.x, extent.b.y],
