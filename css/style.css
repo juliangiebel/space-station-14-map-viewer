@@ -65,3 +65,9 @@ canvas {
 #map-selector-maps > button {
     width: 100%;
 }
+
+#map-selector-maps > button[disabled] {
+    color: #bbb;
+    /* based on ol.css button styling */
+    background-color: rgba(0, 30, 68, 0.75);
+}
