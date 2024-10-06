@@ -41,14 +41,14 @@ class MapSelector extends Control {
 			this.maps = list.maps;
 
 			this.updateList();
-	
+
 		});
 	}
 
 	handleMapChange(selected) {
 		const map = this.getMap();
 		MapLoader.loadLayers(map, selected.id).then(() => this.mapChangeCallback(selected, map));
-		
+
 		this.selected = selected;
 		this.updateList();
 	}
@@ -58,12 +58,14 @@ class MapSelector extends Control {
 		this.selectedLabel.innerHTML = this.selected.name;
 
 		for (const map of this.maps) {
-			if (this.selected.id === map.id)
-				continue;
 
 			const mapButton = document.createElement('button');
 			mapButton.innerHTML = map.name;
-			mapButton.addEventListener('click', this.handleMapChange.bind(this, map), false);
+
+			if (this.selected.id === map.id)
+				mapButton.setAttribute("disabled", "")
+			else
+				mapButton.addEventListener('click', this.handleMapChange.bind(this, map), false);
 
 			this.listElement.appendChild(mapButton);
 		}
